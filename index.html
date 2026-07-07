@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Kỹ năng số</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root{
+    --bg: #fdecf3;
+    --surface: #ffffff;
+    --ink: #4a3347;
+    --ink-soft: #93809a;
+    --pink: #f7c3db;
+    --pink-deep: #d1568e;
+    --lemon: #fdf0ab;
+    --lemon-deep: #c9a227;
+    --line: #f6dde6;
+    --radius: 14px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.65;
+  }
+  a{ color: inherit; }
+  img{ max-width:100%; display:block; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  #sparkle-canvas{
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal{
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.is-visible{ opacity: 1; transform: translateY(0); }
+
+  /* ---------- nav ---------- */
+  .nav{
+    position: sticky; top:0; z-index: 50;
+    display:flex; align-items:center; justify-content: space-between;
+    padding: 18px 6vw;
+    background: rgba(247,247,243,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav .brand{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .nav .brand .dot{ color: var(--pink-deep); }
+  .nav ul{ list-style:none; display:flex; gap: clamp(16px,3vw,32px); margin:0; padding:0; }
+  .nav a{
+    text-decoration:none;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .nav a::after{
+    content:"";
+    position:absolute; left:0; right:100%; bottom:0;
+    height:2px; background: var(--pink-deep);
+    transition: right 0.25s ease;
+  }
+  .nav a:hover, .nav a:focus-visible{ color: var(--ink); }
+  .nav a:hover::after, .nav a:focus-visible::after{ right:0; }
+  @media (max-width:620px){ .nav ul{ display:none; } }
+
+  /* ---------- hero (nền vàng chanh pastel) ---------- */
+  .hero{
+    position: relative;
+    overflow: hidden;
+    max-width: 1080px;
+    margin: 24px auto 0;
+    padding: clamp(60px,10vw,110px) 6vw 70px;
+    border-radius: 24px;
+    background: var(--lemon);
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .hero > *{ position: relative; z-index: 1; }
+  .hero .eyebrow{
+    font-family: var(--font-mono);
+    color: var(--pink-deep);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+  }
+  .hero h1{
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    margin: 0 0 20px;
+    color: var(--ink);
+  }
+  .hero h1 .accent{
+    background: linear-gradient(90deg, var(--pink-deep) 0%, var(--lemon-deep) 25%, var(--pink-deep) 50%, var(--lemon-deep) 75%, var(--pink-deep) 100%);
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: name-shimmer 5s linear infinite;
+  }
+  @keyframes name-shimmer{
+    0%{ background-position: 0% 50%; }
+    100%{ background-position: 250% 50%; }
+  }
+  .hero p.lede{ color: var(--ink-soft); font-size: 1.05rem; max-width: 48ch; margin: 0 0 28px; }
+  .hero .goals{ list-style:none; padding:0; margin: 0 0 32px; display:flex; flex-direction:column; gap:10px; }
+  .hero .goals li{ display:flex; gap:10px; align-items:flex-start; font-size:0.95rem; color: var(--ink-soft); }
+  .hero .goals li::before{ content:"✦"; color: var(--pink-deep); flex-shrink:0; font-size: 0.8rem; }
+  .btn{
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration:none;
+    padding: 13px 24px;
+    border-radius: 999px;
+    display:inline-block;
+  }
+  .btn.primary{ background: var(--pink-deep); color: #fff; }
+  .btn.primary:hover{ background: #b8447a; }
+
+  .hero-photo{
+    aspect-ratio: 1/1;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(209,86,142,0.25);
+    border-radius: var(--radius);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align:center;
+    padding: 24px;
+    position: relative;
+    overflow:hidden;
+  }
+  .hero-photo img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: calc(var(--radius) - 8px);
+  }
+  .hero-photo::after{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 30% 20%, rgba(209,86,142,0.14), transparent 60%);
+  }
+
+  /* ---------- bling bling ---------- */
+  .bling{
+    position: absolute;
+    pointer-events: none;
+    color: var(--pink-deep);
+    z-index: 2;
+    animation: bling-pulse 3.6s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(209,86,142,0.55);
+  }
+  .bling.lemon{ color: var(--lemon-deep); text-shadow: 0 0 8px rgba(201,162,39,0.55); }
+  .bling.flower{
+    font-size: 1.6rem;
+    text-shadow: none;
+    filter: drop-shadow(0 0 6px rgba(209,86,142,0.45));
+    animation-duration: 4.2s;
+  }
+  .bling.b1{ top: 8%; right: 10%; font-size: 1.7rem; animation-delay: 0s; }
+  .bling.b2{ top: 46%; left: 4%; font-size: 1.1rem; animation-delay: 0.7s; }
+  .bling.b3{ bottom: 12%; right: 22%; font-size: 1.3rem; animation-delay: 1.3s; }
+  .bling.b4{ top: 8%; right: 10%; font-size: 1.2rem; animation-delay: 0.4s; }
+  .bling.b5{ top: 20%; left: 42%; font-size: 0.9rem; animation-delay: 1.7s; }
+  .bling.b6{ bottom: 22%; left: 6%; font-size: 1.4rem; animation-delay: 0.2s; }
+  .bling.b7{ top: 4%; left: 20%; font-size: 1rem; animation-delay: 2.1s; }
+  .bling.b8{ bottom: 6%; right: 4%; font-size: 1.5rem; animation-delay: 1s; }
+  .bling.b9{ top: 12%; left: 10%; font-size: 1rem; animation-delay: 0.9s; }
+  .bling.b10{ bottom: 14%; right: 14%; font-size: 1.3rem; animation-delay: 1.5s; }
+  .bling.b11{ top: 14%; left: 52%; animation-delay: 0.5s; }
+  .bling.b12{ bottom: 28%; left: 14%; animation-delay: 2.4s; }
+  .bling.b13{ top: 30%; right: 6%; animation-delay: 1.1s; }
+  .bling.b14{ bottom: 10%; left: 8%; font-size: 1.3rem; animation-delay: 0.8s; }
+  .bling.b15{ top: 10%; right: 8%; font-size: 1.2rem; animation-delay: 2s; }
+
+  @keyframes bling-pulse{
+    0%, 100%{ transform: scale(0.65) rotate(0deg); opacity: 0.3; }
+    50%{ transform: scale(1.2) rotate(18deg); opacity: 1; }
+  }
+
+  .btn.primary{ position: relative; overflow: hidden; }
+  .btn.primary::after{
+    content:"";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.85), transparent);
+    transform: skewX(-20deg);
+    animation: btn-shine 3.4s ease-in-out infinite;
+  }
+  @keyframes btn-shine{
+    0%{ left: -60%; }
+    45%{ left: 130%; }
+    100%{ left: 130%; }
+  }
+
+  /* ---------- section shell ---------- */
+  section{ max-width: 1080px; margin: 0 auto; padding: 60px 6vw; }
+  .section-head{ margin-bottom: 40px; max-width: 60ch; }
+  .section-head .num{
+    font-family: var(--font-mono);
+    color: var(--pink-deep);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+  .section-head h2{
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+    margin: 8px 0 10px;
+  }
+  .section-head p{ color: var(--ink-soft); margin:0; }
+
+  /* ---------- projects grid ---------- */
+  .projects{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+    gap: 24px;
+  }
+  .project-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .project-card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(30,42,56,0.08);
+  }
+  .project-card .idx{
+    font-family: var(--font-mono);
+    color: var(--pink-deep);
+    font-size: 0.78rem;
+    display:block;
+    margin-bottom: 12px;
+  }
+  .project-card h3{
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    margin: 0 0 10px;
+  }
+  .project-card p{ color: var(--ink-soft); font-size: 0.93rem; margin: 0 0 18px; }
+  .project-card .links{ display:flex; gap: 16px; flex-wrap:wrap; }
+  .project-card .links a{
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration:none;
+    color: var(--pink-deep);
+    border-bottom: 2px solid transparent;
+  }
+  .project-card .links a:hover{ border-color: var(--pink); }
+
+  /* ---------- tổng kết ---------- */
+  .summary{
+    position: relative;
+    overflow: hidden;
+    background: var(--pink);
+    color: var(--ink);
+    border-radius: var(--radius);
+    padding: 48px 6vw;
+    max-width: 1080px;
+    margin: 0 auto 60px;
+  }
+  .summary .section-head p{ color: var(--ink-soft); }
+  .summary .section-head .num{ color: var(--pink-deep); }
+  .summary-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+    gap: 28px;
+  }
+  .summary-block{
+    background: rgba(255,255,255,0.55);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+  .summary-block h4{
+    font-family: var(--font-display);
+    font-size: 1rem;
+    margin: 0 0 10px;
+    color: var(--pink-deep);
+  }
+  .summary-block p{ color: var(--ink-soft); font-size: 0.94rem; margin:0; }
+
+  /* ---------- lời cảm ơn & liên hệ ---------- */
+  .thanks{
+    position: relative;
+    overflow: hidden;
+    background: var(--lemon);
+    border: none;
+    border-radius: var(--radius);
+    padding: 48px 6vw;
+    max-width: 1080px;
+    margin: 0 auto 20px;
+    text-align: center;
+  }
+  .thanks .section-head{ margin: 0 auto 28px; text-align:center; }
+  .thanks .section-head p.note{
+    max-width: 56ch;
+    margin: 0 auto;
+    font-size: 1rem;
+    color: var(--ink-soft);
+  }
+  .contact-links{
+    display:flex; flex-wrap:wrap; justify-content:center;
+    gap: 14px; margin-top: 34px;
+  }
+  .contact-links a{
+    display:flex; align-items:center; gap:8px;
+    text-decoration:none;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(209,86,142,0.2);
+    padding: 12px 20px;
+    border-radius: 999px;
+    transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .contact-links a:hover{
+    transform: translateY(-3px);
+    border-color: var(--pink-deep);
+    color: var(--pink-deep);
+  }
+  .contact-links a .ic{ font-size: 1rem; }
+
+  /* ---------- footer ---------- */
+  footer{
+    text-align:center;
+    padding: 30px 6vw 46px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+  footer a{ color: var(--pink-deep); text-decoration:none; }
+
+  @media (max-width: 760px){
+    .hero{ grid-template-columns: 1fr; }
+    .hero-photo{ order:-1; max-width: 220px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sparkle-canvas"></canvas>
+
+<nav class="nav">
+  <div class="brand">Portfolio<span class="dot">.</span>Số</div>
+  <ul>
+    <li><a href="#gioi-thieu">Giới thiệu</a></li>
+    <li><a href="#du-an">Dự án</a></li>
+    <li><a href="#tong-ket">Tổng kết</a></li>
+    <li><a href="#lien-he">Liên hệ</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="gioi-thieu">
+  <span class="bling b1">✦</span>
+  <span class="bling b2 lemon">✧</span>
+  <span class="bling b3">✦</span>
+  <span class="bling b5 lemon">✦</span>
+  <span class="bling b6">✧</span>
+  <span class="bling b7 lemon">✦</span>
+  <span class="bling b8">✧</span>
+  <div class="reveal">
+    <p class="eyebrow">Trang giới thiệu</p>
+    <h1 id="js-name">Xin chào, mình là <span class="accent">Nguyễn Văn A</span></h1>
+    <p class="lede" id="js-intro">Sinh viên ngành Công nghệ thông tin, yêu thích khám phá các công cụ số và trí tuệ nhân tạo trong học tập. Đây là nơi mình tổng hợp lại các bài tập rèn luyện kỹ năng số trong học kỳ này.</p>
+    <ul class="goals" id="js-goals">
+      <li>Thể hiện các kỹ năng số đã học qua từng bài tập cụ thể</li>
+      <li>Lưu trữ sản phẩm cá nhân để dễ dàng truy cập và chia sẻ</li>
+      <li>Rèn luyện thói quen trình bày và phản ánh quá trình học tập</li>
+    </ul>
+    <a class="btn primary" href="#du-an">Xem các dự án</a>
+  </div>
+  <div class="hero-photo reveal" id="js-photo">
+    <span class="bling b4 lemon">✧</span>
+    <span class="bling b9">✦</span>
+    <span class="bling b10 lemon">✧</span>
+    <img src="anh-dai-dien.jpg" alt="Ảnh chân dung Vũ Thị Thảo My">
+  </div>
+</header>
+
+<section id="du-an">
+  <div class="section-head reveal">
+    <span class="num">02 — Trang dự án</span>
+    <h2>Các bài tập đã hoàn thành</h2>
+    <p>Tổng hợp và trình bày lại kết quả các bài tập rèn luyện kỹ năng số, mỗi bài gắn với sản phẩm cụ thể.</p>
+  </div>
+  <div class="projects" id="js-projects"></div>
+</section>
+
+<section id="tong-ket">
+  <div class="summary">
+    <span class="bling b1">✦</span>
+    <span class="bling b6 lemon">✧</span>
+    <span class="bling b8">✦</span>
+    <div class="section-head reveal">
+      <span class="num">03 — Trang tổng kết</span>
+      <h2>Trải nghiệm &amp; cảm nhận cá nhân</h2>
+      <p>Nhìn lại quá trình thực hiện Portfolio và những gì đã học được.</p>
+    </div>
+    <div class="summary-grid" id="js-summary"></div>
+  </div>
+</section>
+
+<section id="lien-he">
+  <div class="thanks reveal">
+    <span class="bling b3 lemon">✧</span>
+    <span class="bling b7">✦</span>
+    <span class="bling b9 lemon">✧</span>
+    <div class="section-head">
+      <span class="num">04 — Lời cảm ơn</span>
+      <h2>Cảm ơn thầy cô</h2>
+      <p class="note" id="js-thanks-note">Viết lời cảm ơn tới thầy cô đã hướng dẫn bạn trong quá trình thực hiện Portfolio này.</p>
+    </div>
+    <div class="contact-links" id="js-contacts"></div>
+  </div>
+</section>
+
+<footer>
+  © <span id="js-year"></span> · Liên hệ: <a href="mailto:ten@email.com" id="js-email">ten@email.com</a>
+</footer>
+
+<script>
+/* =====================================================================
+   VÙNG CHỈNH SỬA NỘI DUNG — sửa các giá trị bên dưới theo thông tin của bạn.
+   ===================================================================== */
+
+const PROFILE = {
+  name: "Vũ Thị Thảo My",
+  intro: "Sinh viên ngành Ngôn ngữ và Văn hóa Nhật Bản, Trường Đại học Ngoại ngữ - ĐHQG Hà Nội. Mình thích nghe nhạc, đi dạo công viên và chụp ảnh phong cảnh — một người yêu sự thoải mái, quen thuộc và luôn cố gắng vì mục tiêu của bản thân. Trước mắt, mình mong sử dụng thành thạo tiếng Nhật và các công cụ tin học cơ bản để phục vụ việc học; xa hơn, mình muốn có nhiều cơ hội giao lưu, học hỏi về nền văn minh xứ sở hoa anh đào.",
+  goals: [
+    "Tổng hợp và trình bày lại kiến thức, kỹ năng số đã học được từ môn Nhập môn Công nghệ số và Ứng dụng Trí tuệ nhân tạo",
+    "Rèn luyện khả năng sử dụng thành thạo các công cụ tin học cơ bản, làm nền tảng phục vụ việc học tiếng Nhật và các môn học khác",
+    "Lưu trữ sản phẩm học tập cá nhân để dễ dàng giới thiệu năng lực bản thân trong tương lai"
+  ],
+  email: "myt08581@gmail.com"
+};
+
+// 6 bài tập theo đúng cấu trúc yêu cầu — sửa mô tả và link theo sản phẩm thật của bạn
+const PROJECTS = [
+  {
+    title: "Máy tính và các thiết bị ngoại vi",
+    description: "Thực hành thành thạo các thao tác cơ bản với tệp tin và thư mục trên Windows: tạo, đổi tên, sao chép, di chuyển, xóa và khôi phục từ Thùng rác, kèm ảnh chụp minh họa từng bước.",
+    demoLink: "",
+    fileLink: "https://docs.google.com/document/d/1FWdHo9Bx1NoKd3mviD6V1YtQKsPR-Fc9eGp2kqnfIZI/edit?usp=sharing"
+  },
+  {
+    title: "Khai thác dữ liệu và thông tin",
+    description: "Thực hành sử dụng các toán tử tìm kiếm nâng cao, lập bảng so sánh công cụ tìm kiếm, tìm kiếm hình ảnh ngược và khai thác Google Scholar để đánh giá độ tin cậy của nguồn thông tin học thuật.",
+    demoLink: "",
+    fileLink: "https://docs.google.com/document/d/1SoRQ3LSIaCABM3_1Qxi3Sc7V-Xk-FqK74gq1RYjDapo/edit?usp=sharing"
+  },
+  {
+    title: "Tổng quan về trí tuệ nhân tạo",
+    description: "So sánh khả năng hỗ trợ học tập của ChatGPT, Notion AI và Claude AI; xây dựng và phân tích 3 phiên bản Prompt (cơ bản, cải tiến, nâng cao) để tạo bài ôn tập tiếng Nhật, từ đó rút ra nguyên tắc viết Prompt hiệu quả.",
+    demoLink: "",
+    fileLink: "https://docs.google.com/document/d/1o9ua1TLWbeAA6pd98iVPrAH3B_GGm9Sw0SsVzsymVUc/edit?usp=sharing"
+  },
+  {
+    title: "Giao tiếp và hợp tác trong môi trường số",
+    description: "Thực hành sử dụng Trello, Google Docs, Google Drive và Discord để quản lý tiến độ, soạn thảo tài liệu và trao đổi trong dự án nhóm, kèm nhật ký hoạt động và đánh giá ưu nhược điểm từng công cụ.",
+    demoLink: "",
+    fileLink: "https://docs.google.com/document/d/1h5ZJmG47anlA2f_VotFHTs7whIhtq8_56VDSyz7kWjw/edit?usp=sharing"
+  },
+  {
+    title: "Sáng tạo nội dung số",
+    description: "Trưng bày sản phẩm nội dung số hoàn thiện (hình ảnh, video hoặc bài viết) được hỗ trợ bởi AI tạo sinh.",
+    demoLink: "",
+    fileLink: ""
+  },
+  {
+    title: "An toàn và liêm chính học thuật trong môi trường số",
+    description: "Tìm hiểu chính sách sử dụng AI của trường đại học, thực hành soạn bài thuyết trình với sự hỗ trợ của AI, phân tích các vấn đề đạo đức và xây dựng bộ 7 nguyên tắc cá nhân khi sử dụng AI có trách nhiệm.",
+    demoLink: "",
+    fileLink: "https://docs.google.com/document/d/1AohKu5hyAWVGyZE12WsYLLJkdup_-d91wDbr1J0YG14/edit?usp=sharing"
+  }
+];
+
+// Nội dung trang tổng kết — 3 khối theo yêu cầu
+const SUMMARY = [
+  {
+    heading: "Trải nghiệm quá trình",
+    text: "Ban đầu mình gần như chưa biết cách sử dụng nhiều phần mềm và công cụ số, nhưng qua từng bài tập, mình dần học được cách tận dụng công nghệ một cách chủ động. Mình nhận ra AI không chỉ để hỏi - đáp đơn thuần, mà còn có thể trở thành người đồng hành hỗ trợ, giúp đỡ mình trong suốt quá trình học tập."
+  },
+  {
+    heading: "Kiến thức & kỹ năng học được",
+    text: "Qua dự án, mình đã học được cách thao tác cơ bản với máy tính và tệp tin, tìm kiếm - đánh giá thông tin học thuật, viết Prompt hiệu quả khi làm việc với AI, sử dụng các công cụ hợp tác trực tuyến trong nhóm, tạo nội dung số với sự hỗ trợ của AI, và quan trọng nhất là sử dụng AI một cách có trách nhiệm, trung thực trong học tập."
+  },
+  {
+    heading: "Điểm tâm đắc & thách thức",
+    text: "Khó khăn lớn nhất là đôi lúc mình chưa hiểu rõ cách sử dụng một số công cụ hoặc kỹ thuật mới, nhưng nhờ tìm hiểu thêm và được thầy cô hỗ trợ, mình đã dần khắc phục được. Điều mình tâm đắc nhất là thấy được sự tiến bộ rõ rệt của bản thân, từ một người khá bỡ ngỡ với công nghệ đến khi có thể tự tin ứng dụng nó vào việc học."
+  }
+];
+
+// Lời cảm ơn — không nêu tên cụ thể
+const THANKS_NOTE = "Mình xin gửi lời cảm ơn chân thành đến thầy cô đã tận tình hướng dẫn, góp ý trong suốt quá trình thực hiện các bài tập và hoàn thiện Portfolio này. Những kiến thức và kỹ năng số mà mình học được sẽ là hành trang quý giá cho chặng đường học tập tiếp theo.";
+
+// Các link liên hệ — chỉ giữ email và số điện thoại theo yêu cầu
+const CONTACTS = [
+  { icon: "✉️", label: "myt08581@gmail.com", url: "mailto:myt08581@gmail.com" },
+  { icon: "📞", label: "094 103 4029", url: "tel:0941034029" }
+];
+
+/* =====================================================================
+   PHẦN RENDER — không cần chỉnh sửa bên dưới
+   ===================================================================== */
+(function render(){
+  document.getElementById('js-name').innerHTML = 'Xin chào, mình là <span class="accent">' + PROFILE.name + '</span>';
+  document.getElementById('js-intro').textContent = PROFILE.intro;
+  document.getElementById('js-goals').innerHTML = PROFILE.goals.map(g => `<li>${g}</li>`).join("");
+  document.getElementById('js-email').textContent = PROFILE.email;
+  document.getElementById('js-email').href = "mailto:" + PROFILE.email;
+  document.getElementById('js-year').textContent = new Date().getFullYear();
+
+  const projWrap = document.getElementById('js-projects');
+  projWrap.innerHTML = PROJECTS.map((p, i) => `
+    <article class="project-card reveal">
+      <span class="idx">Bài tập ${i+1}</span>
+      <h3>${p.title}</h3>
+      <p>${p.description}</p>
+      <div class="links">
+        ${p.demoLink ? `<a href="${p.demoLink}" target="_blank" rel="noopener">Xem sản phẩm →</a>` : ''}
+        ${p.fileLink ? `<a href="${p.fileLink}" target="_blank" rel="noopener">Tệp đính kèm →</a>` : ''}
+      </div>
+    </article>
+  `).join("");
+
+  const sumWrap = document.getElementById('js-summary');
+  sumWrap.innerHTML = SUMMARY.map(s => `
+    <div class="summary-block reveal">
+      <h4>${s.heading}</h4>
+      <p>${s.text}</p>
+    </div>
+  `).join("");
+
+  document.getElementById('js-thanks-note').textContent = THANKS_NOTE;
+  const contactWrap = document.getElementById('js-contacts');
+  contactWrap.innerHTML = CONTACTS.filter(c => c.url).map(c => `
+    <a href="${c.url}" target="_blank" rel="noopener"><span class="ic">${c.icon}</span>${c.label}</a>
+  `).join("");
+
+  // Hiệu ứng cuộn nhẹ (fade + slide up)
+  const targets = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    targets.forEach(t => io.observe(t));
+  } else {
+    targets.forEach(t => t.classList.add('is-visible'));
+  }
+
+  // Hiệu ứng hoa nhấp nháy phủ toàn trang
+  const canvas = document.getElementById('sparkle-canvas');
+  const ctx = canvas.getContext('2d');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sparkleColors = ['225,120,168', '224,181,42', '242,166,201']; // hồng đậm, vàng mật ong, hồng nhạt
+  let sparkles = [];
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.floor((window.innerWidth * window.innerHeight) / 5500);
+    sparkles = Array.from({ length: count }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 7 + 4,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.012 + 0.005,
+      rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.01,
+      color: sparkleColors[Math.floor(Math.random() * sparkleColors.length)]
+    }));
+  }
+
+  function drawFlower(s, alpha){
+    const petalCount = 5;
+    const r = s.size;
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rotation);
+    ctx.fillStyle = `rgba(${s.color},${alpha})`;
+    for (let i = 0; i < petalCount; i++){
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.55, r * 0.32, r * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.rotate((Math.PI * 2) / petalCount);
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.24, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFrame(){
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    sparkles.forEach(s => {
+      s.phase += s.speed;
+      s.rotation += s.spin;
+      const alpha = Math.max(0, Math.sin(s.phase)) * 0.75;
+      if (alpha > 0.02) drawFlower(s, alpha);
+    });
+    if (!prefersReducedMotion) requestAnimationFrame(drawFrame);
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  if (prefersReducedMotion){
+    // Vẽ một lần với độ mờ cố định, không lặp animation
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    sparkles.forEach(s => drawFlower(s, 0.3));
+  } else {
+    requestAnimationFrame(drawFrame);
+  }
+})();
+</script>
+
+</body>
+</html>
